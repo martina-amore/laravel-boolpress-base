@@ -14,7 +14,7 @@ class PostSeeder extends Seeder
      */
     public function run()
     {
-        factory(App\Post::class, 30)->create()->each(
+        factory(App\Post::class, 100)->create()->each(
             function($post){
                 $post->save();
             }
