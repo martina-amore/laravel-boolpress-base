@@ -12,6 +12,10 @@ use App\Category;
 
 use App\Tag;
 
+use Illuminate\Support\Facades\Validator;
+
+use App\Http\Requests\PostFormRequest;
+
 class PostsController extends Controller
 {
     /**
@@ -19,12 +23,12 @@ class PostsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
 
         $posts = Post::all();
 
-        return view('index', compact('posts'));
+        return view('posts.index', compact('posts'));
     }
 
     /**
@@ -34,7 +38,10 @@ class PostsController extends Controller
      */
     public function create()
     {
-        //
+        $categories = Category::all();
+        $tags = Tag::all();
+
+        return view('posts.create', compact('categories', 'tags'));
     }
 
     /**
@@ -43,9 +50,19 @@ class PostsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(PostFormRequest $request)
     {
-        //
+        $validated = $request->validated();
+
+        $newPost = new Post();
+
+        $newPost->title = $validated['title'];
+        $newPost->author = $validated['author'];
+        $newPost->category = $validated['category_id'];
+
+        $newPost->save();
+
+        return view('posts.success');
     }
 
     /**
@@ -56,7 +73,9 @@ class PostsController extends Controller
      */
     public function show($id)
     {
-        //
+        $post = Post::find($id);
+
+        return view('posts.show', compact('post'));
     }
 
     /**
@@ -67,7 +86,11 @@ class PostsController extends Controller
      */
     public function edit($id)
     {
-        //
+        $post = Post::find($id);
+        $categories = Category::all();
+        $tags = Tag::all();
+
+        return view('posts.edit', compact('post', 'categories', 'tags'));
     }
 
     /**
@@ -77,9 +100,19 @@ class PostsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(PostFormRequest $request, $id)
     {
-        //
+        $validated = $request->validated();
+
+        $oldPost = Post::find($id);
+
+        $oldPost->title = $validated['title'];
+        $oldPost->author = $validated['author'];
+        $oldPost->category = $validated['category_id'];
+
+        $oldPost->save();
+
+        return redirect()->route('posts.index');
     }
 
     /**

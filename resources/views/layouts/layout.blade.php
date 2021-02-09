@@ -9,6 +9,11 @@
     </head>
     <body>
         <header>
+            <ul>
+                @foreach(config('layout.routes') as $route)
+                <li class={{ Route::currentRouteName() == $route['pathId'] ? 'active' : '' }}><a href="{{ route($route['pathId']) }}">{{$route['displayText']}}</a></li>
+                @endforeach
+            </ul>
         </header>
 
         @yield('content', 'Nessun contenuto disponibile')
