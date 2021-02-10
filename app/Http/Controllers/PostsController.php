@@ -12,10 +12,6 @@ use App\Category;
 
 use App\Tag;
 
-use Illuminate\Support\Facades\Validator;
-
-use App\Http\Requests\PostFormRequest;
-
 class PostsController extends Controller
 {
     /**
@@ -23,7 +19,7 @@ class PostsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index()
     {
 
         $posts = Post::all();
@@ -50,17 +46,23 @@ class PostsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(PostFormRequest $request)
+    public function store(Request $request)
     {
-        $validated = $request->validated();
+        $data = $request->all();
 
         $newPost = new Post();
+        $newPostInfo = new PostInformation();
 
-        $newPost->title = $validated['title'];
-        $newPost->author = $validated['author'];
-        $newPost->category = $validated['category_id'];
+        $newPost->title = $data['title'];
+        $newPost->author = $data['author'];
+        $newPost->category_id = $data['category_id'];
+        $newPostInfo->description = $data['description'];
+        $newPostInfo->slug = '';
 
         $newPost->save();
+        $newPostInfo->post_id = $newPost->id;
+        $newPostInfo->save();
+        $newPost->tag()->attach($data['tags']);
 
         return view('posts.success');
     }
@@ -100,17 +102,23 @@ class PostsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(PostFormRequest $request, $id)
+    public function update(Request $request, $id)
     {
-        $validated = $request->validated();
+        $data = $request->all();
 
         $oldPost = Post::find($id);
 
-        $oldPost->title = $validated['title'];
-        $oldPost->author = $validated['author'];
-        $oldPost->category = $validated['category_id'];
+        $oldPost->tag()->detach();
+
+        $oldPost->title = $data['title'];
+        $oldPost->author = $data['author'];
+        $oldPost->category_id = $data['category_id'];
+        $oldPost->postInformation->description = $data['description'];
+        $oldPost->tag()->attach($data['tags']);
 
         $oldPost->save();
+        $oldPost->postInformation->save();
+
 
         return redirect()->route('posts.index');
     }
@@ -123,6 +131,13 @@ class PostsController extends Controller
      */
     public function destroy($id)
     {
-        //
+      $post = Post::find($id);
+      $tags = Tag::all();
+
+      $post->tag()->detach($tags);
+      $post->postInformation->delete();
+      $post->delete();
+
+      return redirect()->route('posts.index');
     }
 }

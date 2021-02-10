@@ -13,9 +13,15 @@
                 @endforeach
             </h5></td>
             <td><p><strong>Descrizione: </strong>{{ $post->postInformation->description }}</p><br></td>
-            <td><a href="{{ route('posts.show', $post->id) }}">Dettagli</a></td>
-            <td><a href="{{ route('posts.edit', $post->id) }}">Modifica</a></td>
-            <td><a href="">Cancella</a></td>
+            <td><a href="{{ route('posts.show', $post->id) }}"><button type="submit">Dettagli</button></a></td>
+            <td><a href="{{ route('posts.edit', $post->id) }}"><button type="submit">Modifica</button></a></td>
+            <td>
+                <form action="{{route('posts.destroy', $post->id)}}" method="POST">
+                     @CSRF
+                     @method('DELETE')
+                     <button type="submit">Cancella</button>
+                </form>
+            </td>
         </tr>
     @endforeach
 </table>
